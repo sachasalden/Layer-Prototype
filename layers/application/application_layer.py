@@ -1,12 +1,23 @@
 from .message_parser import MessageParser
 from .handlers import Handlers
+from .metadata import MetaData
 from .response_builder import ResponseBuilder
-
+from .validate import Validator
 class ApplicationLayer:
     def process(self,raw):
         data = MessageParser.parse(raw)
-        if "type" not in data:
-            return ResponseBuilder.build({"error":"no type given"})
+        meta = MetaData.generate(data)
+
+        if "error" in data:
+            meta["status"] = "error"
+            return ResponseBuilder.build({"meta":meta,"data":data})
+
+        validationError= Validator.validateMessage(data)
+        if validationError:
+            meta["status"] = "error"
+            return ResponseBuilder.build({"meta":meta,"data":data})
+
+
         messageType = data["type"]
         if messageType == "ping":
             response = Handlers.handlePing(data)
@@ -19,4 +30,4 @@ class ApplicationLayer:
         else:
             response = Handlers.handleError(data)
 
-        return ResponseBuilder.build(response)
+        return ResponseBuilder.build({"meta":meta,"data":response})
