@@ -1,96 +1,73 @@
 import socket
-import json
-import time
+import asyncio
+from layers.presentation import (
+    PresentationProtocol,
+    read_messages,
+    send_message,
+    error_message
+)
 
 class HanTTPSessionServer:
     def __init__(self, host="127.0.0.1", port=5000):
-        # Server luistert op localhost op poort 5000
         self.host = host
         self.port = port
-        self.conn = None     # TCP-verbinding met client
-        self.addr = None     # Adres van client
 
-    def start(self):
-        # Maak TCP socket aan
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    async def start(self):
+        server = await asyncio.start_server(self.handle_client, self.host, self.port)
+        print("Server gestart op", self.host, self.port)
+        async with server:
+            await server.serve_forever()
 
-        # Bind naar host + port
-        s.bind((self.host, self.port))
+    async def handle_client(self, reader, writer):
+        print("Client verbonden.")
+        buffer = ""
 
-        # Wacht op inkomende verbindingen (max 1 tegelijk)
-        s.listen(1)
-        print("Server wacht op verbinding...")
+        # Handshake fase
+        buffer = await self.handle_handshake(reader, writer, buffer)
 
-        # Accepteer verbinding met een client
-        self.conn, self.addr = s.accept()
-        print(f"Verbonden met {self.addr}")
-
-        # Voer handshake uit (start van de sessie)
-        self.handle_handshake()
-
-        # Start de sessieloop (heartbeats ontvangen)
-        self.session_loop()
-
-    def send_json(self, data: dict):
-        # Dictionary -> JSON string -> bytes -> versturen
-        msg = json.dumps(data).encode()
-        self.conn.sendall(msg)
-
-    def receive_json(self):
-        # Ontvang JSON string van client
-        data = self.conn.recv(1024).decode()
-
-        # Als er niets binnenkomt, is de verbinding gesloten
-        if not data:
-            return None
-
-        # JSON string terug naar dict
-        return json.loads(data)
-
-    # ----------------------------
-    # SESSION LAYER FUNCTIES
-    # ----------------------------
-
-    def handle_handshake(self):
-        """
-        Handshake tussen client en server.
-        Client stuurt: { "type": "handshake_init" }
-        Server antwoordt: { "type": "handshake_ack" }
-        """
-        msg = self.receive_json()
-        if msg and msg.get("type") == "handshake_init":
-            print("Handshake ontvangen.")
-
-            response = {
-                "type": "handshake_ack",
-                "status": "ok"
-            }
-
-            self.send_json(response)
-            print("Handshake voltooid.")
-
-    def session_loop(self):
-        """
-        Blijft continu JSON-berichten ontvangen.
-        In deze fase kijken we alleen naar heartbeats.
-        """
-        print("Sessielaag actief. Wachten op heartbeats...")
-
+        # Sessie fase → normaal verkeer
+        print("Sessielaag actief.")
         while True:
-            msg = self.receive_json()
-
-            # Verbinding gesloten
-            if not msg:
-                print("Verbinding verbroken.")
+            data = await reader.read(1024)
+            if not data:
+                print("Client afgesloten.")
                 break
 
-            # Heartbeat message
-            if msg.get("type") == "heartbeat":
-                print("Heartbeat ontvangen.")
-                self.send_json({"type": "heartbeat_ack"})
+            buffer += data.decode()
+            messages, buffer = read_messages(buffer)
 
+            for msg in messages:
 
-# Start server als script direct wordt uitgevoerd
-if __name__ == "__main__":
-    server = HanTTPSessionServer()
-    server.start()
+                #Validate message
+                error = PresentationProtocol.validate_message(msg)
+                if error:
+                    await send_message(writer, error_message(error, "Invalid message"))
+                    continue
+
+                # Handle types
+                if msg["type"] == "ping":
+                    await send_message(writer, {"type": "pong", "version": 1, "payload": {}})
+
+    async def handle_handshake(self, reader, writer, buffer):
+        while True:
+            data = await reader.read(1024)
+            if not data:
+                break
+
+            buffer += data.decode()
+            messages, buffer = read_messages(buffer)
+
+            for msg in messages:
+                error = PresentationProtocol.validate_message(msg)
+                if error:
+                    await send_message(writer, error_message(error, "Invalid handshake"))
+                    continue
+
+                if msg["type"] == "join":
+                    print("Handshake ontvangen.")
+                    await send_message(writer, {
+                        "type": "state_update",
+                        "version": 1,
+                        "payload": {"players": [], "items": [], "timestamp": 0}
+                    })
+                    return buffer
