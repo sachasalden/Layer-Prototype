@@ -1,23 +1,15 @@
-# this shows the allowed versions so that deprecated versions aren't allowed
 SUPPORTED_VERSION = 1
 
-# here you can define what is mandatory in certain messages (currently examples)
 MESSAGE_SCHEMAS = {
-    "move": {"playerId", "x", "y"},
-    "shoot": {"playerId", "direction"},
-    "join": {"playerId"},
-    "leave": {"playerId"},
-    "ping": set(),
-    "pong": set(),
-    # server → client
-    "state_update": {"players", "items", "timestamp"},
-    "error": {"code", "details"},
+    "REQUEST": {"method", "resource", "payload"},
+    "RESPONSE": {"status", "resource", "payload"},
 }
 
-# returns an error message
-def error_message(code: str, details: str):
+VALID_METHODS = {"GET", "POST", "PUT", "DELETE"}
+
+def error_message(status: int, message: str, resource: str):
     return {
-        "type": "error",
-        "version": SUPPORTED_VERSION,
-        "payload": {"code": code, "details": details},
+        "status": status,
+        "resource": resource,
+        "payload": {"error": message}
     }
