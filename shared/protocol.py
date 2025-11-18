@@ -1,6 +1,6 @@
 import json
 
-MESSAGE_REQUEST = {"method", "resource", "payload"}
+MESSAGE_REQUEST = {"action", "resource", "payload"}
 MESSAGE_RESPONSE = {"status", "resource", "payload"}
 
 VALID_METHODS = {"GET", "POST", "PUT", "DELETE"}
@@ -32,6 +32,14 @@ def error_message(status, resource, reason):
 async def send_message(writer, msg):
     writer.write((json.dumps(msg) + "\n").encode())
     await writer.drain()
+
+def parse_messages(buffer):
+    messages = []
+    while "\n" in buffer:
+        line, buffer = buffer.split("\n", 1)
+        if line.strip():
+            messages.append(json.loads(line))
+    return messages, buffer
 
 def read_messages(buffer):
     messages = []

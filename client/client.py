@@ -1,36 +1,55 @@
-import asyncio
-from shared.protocol import send_message, read_messages
+import asyncio, uuid
+from shared.protocol import send_message, parse_messages
 
 class Client:
     def __init__(self, host="127.0.0.1", port=4000):
         self.host = host
         self.port = port
-        self.reader = None
-        self.writer = None
         self.buffer = ""
+        self.pending = {}  # id → Future
 
     async def connect(self):
         self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+        asyncio.create_task(self.listen())
+
+    async def listen(self):
+        while True:
+            data = await self.reader.read(1024)
+            if not data:
+                break
+
+            self.buffer += data.decode()
+            messages, self.buffer = parse_messages(self.buffer)
+
+            for msg in messages:
+                req_id = msg["id"]
+                if req_id in self.pending:
+                    self.pending[req_id].set_result(msg)
 
     async def send(self, resource, action, payload):
+        req_id = str(uuid.uuid4())
+
+        future = asyncio.get_event_loop().create_future()
+        self.pending[req_id] = future
+
         await send_message(self.writer, {
+            "id": req_id,
             "resource": resource,
             "action": action,
             "payload": payload
         })
 
-        while True:
-            data = await self.reader.read(1024)
-            self.buffer += data.decode()
-            messages, self.buffer = read_messages(self.buffer)
-            if messages:
-                return messages[0]
+        return await future
 
 
 async def main():
-    client = Client()
-    await client.connect()
-    resp = await client.send("/user", "login", {"username": "x", "password": "y"})
-    print(resp)
+    c = Client()
+    await c.connect()
+
+    t1 = c.send("/user", "waittest", {})
+    t2 = c.send("/user", "login", {})
+
+    print(await t2)
+    print(await t1)
 
 asyncio.run(main())

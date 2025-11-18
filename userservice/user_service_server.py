@@ -1,0 +1,59 @@
+import asyncio
+from shared.protocol import send_message, parse_messages
+from userservice.user_service import UserService
+
+
+class UserServiceServer:
+    def __init__(self, host="127.0.0.1", port=6767):
+        self.host = host
+        self.port = port
+        self.service = UserService()
+
+        self.routes = {
+            "login": self.service.login,
+            "waittest": self.service.waittest
+        }
+
+    async def start(self):
+        server = await asyncio.start_server(self.handle_client, self.host, self.port)
+        async with server:
+            await server.serve_forever()
+
+    async def handle_client(self, reader, writer):
+        buffer = ""
+
+        while True:
+            data = await reader.read(1024)
+            if not data:
+                break
+
+            buffer += data.decode()
+            messages, buffer = parse_messages(buffer)
+
+            for msg in messages:
+                asyncio.create_task(self.process_message(msg, writer))
+
+    async def process_message(self, msg, writer):
+        req_id = msg["id"]
+        action = msg.get("action")
+        resource = msg.get("resource")
+        payload = msg.get("payload", {})
+
+        if action not in self.routes:
+            resp = {
+                "id": req_id,
+                "status": 400,
+                "resource": resource,
+                "payload": {"error": "unknown action"}
+            }
+        else:
+            handler = self.routes[action]
+            result = await handler(payload, resource)
+            resp = {"id": req_id, **result}
+
+        await send_message(writer, resp)
+
+
+if __name__ == "__main__":
+    server = UserServiceServer(host="127.0.0.1", port=6001)
+    asyncio.run(server.start())
