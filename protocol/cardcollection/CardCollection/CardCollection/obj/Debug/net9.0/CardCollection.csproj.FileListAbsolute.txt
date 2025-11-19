@@ -1,0 +1,15 @@
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\bin\Debug\net9.0\CardCollection.exe
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\bin\Debug\net9.0\CardCollection.deps.json
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\bin\Debug\net9.0\CardCollection.runtimeconfig.json
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\bin\Debug\net9.0\CardCollection.dll
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\bin\Debug\net9.0\CardCollection.pdb
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.AssemblyInfoInputs.cache
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.AssemblyInfo.cs
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.csproj.CoreCompileInputs.cache
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.sourcelink.json
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.dll
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\refint\CardCollection.dll
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.pdb
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\CardCollection.genruntimeconfig.cache
+C:\Users\Gebruiker\RiderProjects\Layer-Prototype\protocol\cardcollection\CardCollection\CardCollection\obj\Debug\net9.0\ref\CardCollection.dll
