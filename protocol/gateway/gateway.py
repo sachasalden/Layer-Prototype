@@ -1,5 +1,5 @@
 import asyncio
-from shared.protocol import send_message, parse_messages
+from protocol.shared.protocol import send_message, parse_messages
 
 SERVICES = {
     "/user": ("127.0.0.1", 6001)

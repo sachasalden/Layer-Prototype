@@ -1,6 +1,5 @@
 import asyncio
-from shared.protocol import read_messages, send_message
-from userservice.IUserService import IUserService
+
 
 class UserService:
     async def login(self, payload, resource):

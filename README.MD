@@ -1,14 +1,11 @@
 commandos
 
 ```bash
- python -m userservice.user_service_server
+ python -m protocol.userservice.user_service_server
 ```
 ```bash
- python -m gateway.gateway     
+ python -m protocol.gateway.gateway     
 ```
 ```bash
- python -m client.client
-```
-```bash
- python -m tests.load_test.py
+ python -m protocol.client.client
 ```

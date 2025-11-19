@@ -1,6 +1,6 @@
 import asyncio
-from shared.protocol import send_message, parse_messages
-from userservice.user_service import UserService
+from protocol.shared.protocol import send_message, parse_messages
+from protocol.userservice.user_service import UserService
 
 
 class UserServiceServer:
@@ -8,7 +8,7 @@ class UserServiceServer:
         self.host = host
         self.port = port
         self.service = UserService()
-
+        # routes om de action te linken aan een functie
         self.routes = {
             "login": self.service.login,
             "waittest": self.service.waittest
@@ -34,6 +34,10 @@ class UserServiceServer:
                 asyncio.create_task(self.process_message(msg, writer))
 
     async def process_message(self, msg, writer):
+        # van de gateway krijg je een ID, action, resource en payload. ID is voor het bijhouden wie welke request heeft gestuurd en de response linken
+        # aan de goede request. action is voor het linken met de service function. zo kan de server weten welke service functie hij moet callen
+        # de resource is voor de gateway voor het kiezen welke service hij heen moet
+        # de payload is voor de service voor de business logica
         req_id = msg["id"]
         action = msg.get("action")
         resource = msg.get("resource")

@@ -1,7 +1,7 @@
 import asyncio
 import random
 import time
-from shared.protocol import send_message, read_messages
+from protocol.shared import send_message, read_messages
 
 
 class TestClient:

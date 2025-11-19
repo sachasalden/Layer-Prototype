@@ -1,5 +1,5 @@
 import asyncio, uuid
-from shared.protocol import send_message, parse_messages
+from protocol.shared.protocol import send_message, parse_messages
 
 class Client:
     def __init__(self, host="127.0.0.1", port=4000):
