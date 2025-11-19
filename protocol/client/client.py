@@ -46,10 +46,10 @@ async def main():
     c = Client()
     await c.connect()
 
-    t1 = c.send("/user", "waittest", {})
     t2 = c.send("/user", "login", {})
+    t3 = c.send("/savecard", "savecard", {})
 
     print(await t2)
-    print(await t1)
+    print(await t3)
 
 asyncio.run(main())
