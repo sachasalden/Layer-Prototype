@@ -1,4 +1,4 @@
-require 'json'
+require "json"
 
 def error_message(status, resource, reason)
   {
@@ -8,7 +8,8 @@ def error_message(status, resource, reason)
   }
 end
 
-async def send_message(writer, msg)
+# Modern sync send_message, geen async syntax meer
+def send_message(writer, msg)
   json = JSON.generate(msg) + "\n"
   writer.write(json)
   writer.flush
@@ -20,7 +21,6 @@ def parse_messages(buffer)
   while buffer.include?("\n")
     line, buffer = buffer.split("\n", 2)
     next if line.strip.empty?
-
     messages << JSON.parse(line)
   end
 

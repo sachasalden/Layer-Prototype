@@ -47,9 +47,12 @@ async def main():
     await c.connect()
 
     t2 = c.send("/user", "login", {})
-    t3 = c.send("/savecard", "savecard", {})
+    t3 = c.send("/card", "savecard", {})
+    t4 = c.send("/battle", "playedcard", {})
+
 
     print(await t2)
     print(await t3)
+    print(await t4)
 
 asyncio.run(main())
