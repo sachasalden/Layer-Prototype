@@ -1,81 +1,94 @@
-require 'async'
-require 'async/tcp'
+require "socket"
+require "json"
+require_relative "service"
+require_relative "protocol"
 
 class Server
-  def initialize(host: "127.0.0.1", port: 6767)
+  def initialize(host: "127.0.0.1", port: 6003)
     @host = host
     @port = port
     @service = Service.new
 
     @routes = {
-      "playedcard"    => @service.method(:login)
+      "playedcard" => @service.method(:playedcard)
     }
   end
 
   def start
-    Async do |task|
-      endpoint = Async::IO::Endpoint.tcp(@host, @port)
+    server = TCPServer.new(@host, @port)
+    puts "BattleEngineServer started on #{@host}:#{@port}"
 
-      puts "BattleEngineServer started on #{@host}:#{@port}"
+    loop do
+      client = server.accept
 
-      endpoint.accept do |client|
-        task.async { handle_client(client) }
+      Thread.new(client) do |socket|
+        begin
+          handle_client(socket)
+        rescue => e
+          warn "Client error: #{e.class}: #{e.message}"
+        ensure
+          socket.close unless socket.closed?
+        end
       end
     end
   end
 
-  async def handle_client(socket)
-    buffer = ""
+  private
 
-    reader = socket
-    writer = socket
+  def handle_client(socket)
+    buffer = +""
 
     loop do
-      data = reader.read(1024)
-      break if data.nil? || data.empty?
-
+      data = socket.readpartial(1024)  # blokkeert tot er data is of client sluit
       buffer << data
 
       messages, buffer = parse_messages(buffer)
 
       messages.each do |msg|
-        Async::Task.current.async do
-          process_message(msg, writer)
-        end
+        process_message(msg, socket)
       end
     end
-
-    socket.close
+  rescue EOFError
+    # client heeft verbinding netjes gesloten → klaar
   end
 
-  async def process_message(msg, writer)
+  def process_message(msg, socket)
     req_id   = msg["id"]
     action   = msg["action"]
     resource = msg["resource"]
     payload  = msg["payload"] || {}
 
-    unless @routes.key?(action)
+    handler = @routes[action]
+
+    unless handler
       resp = {
-        "id" => req_id,
-        "status" => 400,
+        "id"       => req_id,
+        "status"   => 400,
         "resource" => resource,
-        "payload" => { "error" => "unknown action" }
+        "payload"  => { "error" => "unknown action" }
       }
-      send_message(writer, resp)
+      send_message(socket, resp)
       return
     end
 
-    handler = @routes[action]
+    # Sync call naar de service
+    result = handler.call(payload, resource)
 
-    result = handler.(payload, resource).wait
+    # result is bijv.:
+    # { status: 200, resource: ..., payload: {...} }
+    # We mergen het met de id:
+    resp = { "id" => req_id }.merge(stringify_keys(result))
 
-    resp = { "id" => req_id }.merge(result)
+    send_message(socket, resp)
+  end
 
-    send_message(writer, resp)
+  # Helper om symbol keys om te zetten naar strings (voor JSON / protocol-consistentie)
+  def stringify_keys(hash)
+    hash.transform_keys { |k| k.to_s }
   end
 end
 
 if __FILE__ == $0
-  server = Server.new(host: "127.0.0.1", port: 6001)
+  server = Server.new(host: "127.0.0.1", port: 6003)
   server.start
 end

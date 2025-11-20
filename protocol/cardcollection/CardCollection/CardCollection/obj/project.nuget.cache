@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "IcP7dYtFp8g=",
+  "dgSpecHash": "3XciCuek+Sw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Gebruiker\\RiderProjects\\Layer-Prototype\\protocol\\cardcollection\\CardCollection\\CardCollection\\CardCollection.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\Verda\\Documents\\GitHub\\Layer-Prototype\\protocol\\CardCollection\\CardCollection\\CardCollection\\CardCollection.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Verda\\.nuget\\packages\\microsoft.netcore.app.ref\\9.0.11\\microsoft.netcore.app.ref.9.0.11.nupkg.sha512",
+    "C:\\Users\\Verda\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\9.0.11\\microsoft.windowsdesktop.app.ref.9.0.11.nupkg.sha512",
+    "C:\\Users\\Verda\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\9.0.11\\microsoft.aspnetcore.app.ref.9.0.11.nupkg.sha512",
+    "C:\\Users\\Verda\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\9.0.11\\microsoft.netcore.app.host.win-x64.9.0.11.nupkg.sha512"
+  ],
   "logs": []
 }

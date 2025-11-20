@@ -1,11 +1,6 @@
 import asyncio
 from protocol.shared.protocol import send_message, parse_messages
-
-SERVICES = {
-    "/user": ("127.0.0.1", 6001),
-    "/savecard": ("127.0.0.1", 4001)
-    
-}
+from protocol.gateway.service_registry import SERVICES
 
 class Gateway:
     def __init__(self, host="127.0.0.1", port=4000):
