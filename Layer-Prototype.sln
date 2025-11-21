@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protocol", "protocol", "{473D39C9-61E3-EA25-6A91-EF6E7DA39358}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cardcollection", "cardcollection", "{2683301D-6D9F-BD00-2968-6D233A841538}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CardCollection", "CardCollection", "{E3BD8021-F1A7-43E2-976C-B4C212998ED5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardCollection", "protocol\cardcollection\CardCollection\CardCollection\CardCollection.csproj", "{37CC613E-745B-303F-683A-43B82917B552}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37CC613E-745B-303F-683A-43B82917B552}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37CC613E-745B-303F-683A-43B82917B552}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37CC613E-745B-303F-683A-43B82917B552}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37CC613E-745B-303F-683A-43B82917B552}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2683301D-6D9F-BD00-2968-6D233A841538} = {473D39C9-61E3-EA25-6A91-EF6E7DA39358}
+		{E3BD8021-F1A7-43E2-976C-B4C212998ED5} = {2683301D-6D9F-BD00-2968-6D233A841538}
+		{37CC613E-745B-303F-683A-43B82917B552} = {E3BD8021-F1A7-43E2-976C-B4C212998ED5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B294B779-7D21-477B-A8F2-B24F34832E7C}
+	EndGlobalSection
+EndGlobal
