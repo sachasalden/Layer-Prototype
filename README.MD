@@ -9,5 +9,8 @@ Voor dit prototype heb je de volgende programmeertalen nodig:
 
 Ga naar de docker-compose.yml in de protocol folder en run die.
 
+```bash
 
 docker compose up --build
+
+```
