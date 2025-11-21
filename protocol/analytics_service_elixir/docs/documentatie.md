@@ -1,187 +1,209 @@
-# JSON Line Protocol — Elixir-implementatie (`JsonLineProtocol`)
+# Analytics Service (Elixir) — Documentatie
 
-Dit document specificeert het gedrag van het JSON-gebaseerde line-protocol zoals geïmplementeerd in `JsonLineProtocol` binnen het Elixir-project.  
-Het beschrijft **formaat**, **gedrag**, **edge cases** en **verwachte output** voor de relevante functies.
+Deze documentatie beschrijft het JSON Line Protocol, de Analytics TCP-server, de service-laag, testen, en wat er nog ontbreekt om deze service formeel af te ronden. 
 
-## 1. Doel van het protocol
+Het doel is om een server te realiseren die overeenkomt met de bestaande microservices in Ruby, Python en C#, maar specifiek gericht is op de Analytics-domeinlogica zoals gedefinieerd in het [klassendiagram](https://confluenceasd.aimsites.nl/download/attachments/500346264/image-2025-11-14_15-47-7.png?version=1&modificationDate=1763131626650&api=v2) in [Confluence](https://confluenceasd.aimsites.nl/x/mK3SHQ).
 
-Het JSON Line Protocol transporteert berichten over een stream.  
-Elke boodschap bestaat uit:
+## 1. Doel van de Analytics-service
 
-- één JSON-object  
-- gevolgd door exact één newline (`"\n"`)
+De Analytics-service verwerkt verzoeken voor: 
+- Het ophalen van leaderboardgegevens.
+- Het berekenen van de top 20 spelers.
+- Het ophalen van statistieken van een speler.
+- Het ophalen van game-resultaten (en laatste 20 games).
 
-Voorbeelden:
+De server gebruikt newline-gebaseerde JSON-berichten en verwerkt deze via het protocol `JsonLineProtocol`.
 
+## 2. Transportprotocol: JSON Line Protocol
+
+De volledige specificatie van dit protocol staat hieronder samengevat.
+
+### 2.1. Formaat van berichten
+
+Een bericht bestaat uit: 
+- Eén JSON-object
+- Gevolgd door een newline `\n`
+
+Voorbeeld:
 ```
-{"event":"ping"}\n
-{"status":200,"resource":"/"}\n
+{"id":"1","action":"leaderboard","payload":{}}\n
 ```
 
-Meerdere berichten kunnen achter elkaar in een buffer staan:
+### 2.2. Bufferregels
 
+Buffers kunnen meerdere berichten bevatten:
 ```
 {"x":1}\n{"y":2}\nrest
 ```
 
-## 2. JSON-structuur
+### 2.3. Parsers
 
-### 2.1 Geldige berichten
+| Functie            | Gedrag                           |
+| ------------------ | -------------------------------- |
+| `encode_message/1` | JSON → string + newline          |
+| `parse_messages/1` | Strict, errors → exception       |
+| `read_messages/1`  | Tolerant, errors → error-payload |
 
-Een bericht bevat een JSON-object:
-
-```
-{
-  "hello": "world"
-}
-```
-
-### 2.2 Ongeldige berichten
-
-Wanneer een bericht geen valide JSON is, wordt het vervangen door een foutstructuur:
+### 2.4. Errorstructuur
 
 ```
 {
   "status": 400,
   "resource": "/",
-  "payload": {
-    "error": "INVALID_JSON"
-  }
+  "payload": { "error": "INVALID_JSON" }
 }
 ```
 
+## 3. AnalyticsServer — TCP-server
 
-## 3. Moduleoverzicht
+De server luistert op een TCP-poort en verwerkt inkomende JSON-berichten.
 
-Naam van de module:
+### 3.1. Taken van de server
 
-```elixir
-defmodule JsonLineProtocol do
-end
+1. TCP-verbinding accepteren
+2. Buffer opbouwen
+3. Berichten parsen via `JsonLineProtocol`
+4. `action` uitlezen
+5. Doorsturen naar de juiste functie in `AnalyticsService`
+6. Response terugsturen met exact dezelfde `id`
+
+### 3.2. Routes
+
+De server ondersteunt:
+| Action               | Functie                                    |
+| -------------------- | ------------------------------------------ |
+| `leaderboard`        | `AnalyticsService.leaderboard/2`           |
+| `leaderboard_top20`  | `AnalyticsService.leaderboard_top20/2`     |
+| `stats_for_player`   | `AnalyticsService.player_stats/2`          |
+| `stats_getStats`     | `AnalyticsService.player_stats_detailed/2` |
+| `results_for_player` | `AnalyticsService.player_results/2`        |
+| `results_last20`     | `AnalyticsService.player_last20_results/2` |
+
+## 4. AnalyticsService — businesslogica
+
+De service biedt functies die dummy-data retourneren (placeholder voor echte logica):
+- `leaderboard/2` → lijst `LeaderboardEntry`
+- `leaderboard_top20/2` → top 20 spelers
+- `player_stats/2` → basisstatistieken (`PlayerStats`)
+- `player_stats_detailed/2` → meer detail (zelfde als `player_stats/2`)
+- `player_results/2` → lijst van `GameResult`
+- `player_last20_results/2` → laatste 20 resultaten
+
+> Opmerking:
+
+Er ontbreken formele eisen voor:
+- Foutcodes (bijv. player not found)
+- Validatie van payload
+- Sorteerlogica, limieten (top20, last20)
+- Exacte JSON-vorm van response
+- Opslagmechanisme
+
+## 5. Data-structuren
+
+Drie structs worden gebruikt:
+
+### 5.1. LeaderboardEntry
+| Key          | Type    |
+| ------------ | ------- |
+| player_id    | integer |
+| rank         | string  |
+| win_rate     | float   |
+| games_played | integer |
+| mmr          | integer |
+
+### 5.2. PlayerStats
+| Key          | Type    |
+| ------------ | ------- |
+| player_id    | integer |
+| games_played | integer |
+| wins         | integer |
+| losses       | integer |
+| win_rate     | float   |
+| avg_damage   | integer |
+| mmr          | integer |
+
+### 5.3. GameResult
+| Key           | Type           |
+| ------------- | -------------- |
+| winner_id     | integer        |
+| loser_id      | integer        |
+| winner_damage | integer        |
+| loser_damage  | integer        |
+| timestamp     | ISO8601 string |
+
+## 6. Opstarten van de server
+
+Ga naar de projectmap:
+```
+cd analytics_service_elixir
 ```
 
-Beschikbare functies:
-
-| Functie            | Beschrijving                                                        |
-|--------------------|---------------------------------------------------------------------|
-| `encode_message/1` | Encodeert een bericht naar JSON + `\n`                             |
-| `parse_messages/1` | Strict parser — decode-fouten leiden tot een exception             |
-| `read_messages/1`  | Tolerante parser — decode-fouten leveren foutberichten op          |
-| `error_message/3`  | Produceert de foutstructuur met `status`, `resource` en `payload`  |
-
-## 4. Gedrag per functie
-
-### 4.1 `encode_message/1`
-
-Voorbeeldinput:
-
-```elixir
-JsonLineProtocol.encode_message(%{"hello" => "world"})
-```
-
-Voorbeeldoutput:
-
-```
-"{\"hello\":\"world\"}\n"
-```
-
-### 4.2 `parse_messages/1` (strict)
-
-```elixir
-JsonLineProtocol.parse_messages("{\"x\":1}\n{\"y\":2}\nrest")
-```
-
-Output:
-
-```elixir
-{[%{"x" => 1}, %{"y" => 2}], "rest"}
-```
-
-### 4.3 `read_messages/1` (tolerant)
-
-```elixir
-JsonLineProtocol.read_messages("{ not json }\n")
-```
-
-Output:
-
-```elixir
-{
-  [
-    %{
-      "status" => 400,
-      "resource" => "/",
-      "payload" => %{"error" => "INVALID_JSON"}
-    }
-  ],
-  ""
-}
-```
-
-## 5. Bufferregels
-
-### 5.1 Complete regels
-
-Eindigen op `"\n"` en worden verwerkt.
-
-### 5.2 Incomplete regels
-
-Alles na de laatste newline wordt teruggegeven als restbuffer.
-
-## 6. Runtime-testen
-
-### Test 1 — `encode_message/1`
-
-```elixir
-JsonLineProtocol.encode_message(%{"hello" => "world"})
-```
-
-### Test 2 — `parse_messages/1`
-
-```elixir
-JsonLineProtocol.parse_messages("{\"x\":1}\n{\"y\":2}\nrest")
-```
-
-### Test 3 — `read_messages/1`
-
-```elixir
-JsonLineProtocol.read_messages("{ not json }\n")
-```
-
-## 7. Edge cases
-
-### Lege regels
-
-Resultaat:
-
-```elixir
-{[], ""}
-```
-
-### Valide + invalide JSON gemixt
-
-Buffer:
-
-```
-{"ok":1}\n{invalid}\n{"done":true}\n
-```
-
-## 8. Dependencies
-
-```elixir
-defp deps do
-  [
-    {:jason, "~> 1.4"}
-  ]
-end
-```
-
-Starten:
-
+Start de server in de terminal:
 ```
 iex.bat -S mix
 ```
 
+Vervolgens in iex:
+```
+AnalyticsServer.start({127,0,0,1}, 7001)
+```
+
+Je ziet:
+```
+[AnalyticsServer] Listening on 127.0.0.1:7001
+```
+Als het gelukt is. Laat dit venster openstaan.
+
+## 7. Testen van de service
+
+### 7.1. Testclient (`test_client.exs)
+
+Run in een tweede terminal (weer in dezelfde projectmap):
+```
+mix run test_client.exs
+```
+
+Voorbeeldoutput:
+```
+{"id":"1","payload":{"entries":[...]},
+ "resource":"/leaderboard","status":200}
+```
+
+## 8. Tekortkoming voor een volledige service
+
+Ondanks dat de server _werkt_, ontbreken formeel nog:
+
+### 8.1. Domeinspecificaties
+
+- Hoe leaderboard berekend moet worden (rank, mmr-formule, sortering)
+- Hoe top20 precies moet worden bepaald
+- Welke statistieken verplicht zijn
+- Prioriteit van berekeningen
+- Performance-eisen bij grote datasets
+
+### 8.2. Error handling
+
+- 400 → missing field
+- 404 → player not found
+- 500 → internal analytics error
+- etc.
+
+### 8.3. Opslag van analyticsdata
+
+Op dit moment is alle data dummy.
+
 ## 9. Samenvatting
 
-`JsonLineProtocol` implementeert een newline-gebaseerd JSON-protocol met een strict pad, tolerant pad, uniforme foutstructuur en consistente bufferlogica.
+De Analytics-service bestaat uit:
+1. JsonLineProtocol
+- JSON newline-protocol
+- strict & tolerant parsing
+- standaard foutstructuur
+2. AnalyticsServer
+- TCP-listener
+- route dispatch
+3. AnalyticsService
+- dummy-implementaties van leaderboard/stats/results
+- gebruikt struct-modellen uit het [klassendiagram](https://confluenceasd.aimsites.nl/download/attachments/500346264/image-2025-11-14_15-47-7.png?version=1&modificationDate=1763131626650&api=v2)
+4. Testclient
+- stuurt berichten en leest serverrespons
