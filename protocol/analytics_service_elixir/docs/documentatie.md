@@ -1,6 +1,6 @@
 # Analytics Service (Elixir) — Documentatie
 
-Deze documentatie beschrijft het JSON Line Protocol, de Analytics TCP-server, de service-laag, testen, en wat er nog ontbreekt om deze service formeel af te ronden. 
+Deze documentatie beschrijft het JSON Line Protocol, de Analytics TCP-server, de service-laag, testen (incl. AAA-stijl), en wat er nog ontbreekt om deze service formeel af te ronden. 
 
 Het doel is om een server te realiseren die overeenkomt met de bestaande microservices in Ruby, Python en C#, maar specifiek gericht is op de Analytics-domeinlogica zoals gedefinieerd in het [klassendiagram](https://confluenceasd.aimsites.nl/download/attachments/500346264/image-2025-11-14_15-47-7.png?version=1&modificationDate=1763131626650&api=v2) in [Confluence](https://confluenceasd.aimsites.nl/x/mK3SHQ).
 
@@ -167,6 +167,15 @@ Voorbeeldoutput:
 ```
 {"id":"1","payload":{"entries":[...]},
  "resource":"/leaderboard","status":200}
+```
+
+### 7.2. AAA-stijl testen
+
+De test `analytics_server_test.exs` gebruikt AAA-stijl. 
+
+Voer in de projectmap uit:
+```
+mix test test/analytics_server_test.exs
 ```
 
 ## 8. Tekortkoming voor een volledige service
