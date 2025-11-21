@@ -1,12 +1,13 @@
 import asyncio
-from protocol.shared.protocol import send_message, parse_messages
-from protocol.userservice.user_service import UserService
+from protocol import send_message, parse_messages
+from user_service import UserService
 
-
+import os
 class UserServiceServer:
-    def __init__(self, host="127.0.0.1", port=6767):
-        self.host = host
-        self.port = port
+    def __init__(self):
+        self.host = os.getenv("HOST", "0.0.0.0")
+        self.port = int(os.getenv("PORT", "6001"))
+
         self.service = UserService()
         # routes om de action te linken aan een functie
         self.routes = {
@@ -59,5 +60,5 @@ class UserServiceServer:
 
 
 if __name__ == "__main__":
-    server = UserServiceServer(host="127.0.0.1", port=6001)
+    server = UserServiceServer()
     asyncio.run(server.start())

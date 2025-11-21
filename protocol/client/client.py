@@ -1,15 +1,17 @@
 import asyncio, uuid
-from protocol.shared.protocol import send_message, parse_messages
+from protocol import send_message, parse_messages
+import os
 
 class Client:
-    def __init__(self, host="127.0.0.1", port=4000):
-        self.host = host
+    def __init__(self, port=4001):
         self.port = port
+        self.gatewayPort = int(os.getenv("GATEWAY_PORT", "4000"))
+        self.host = os.getenv("GATEWAY_HOST", "gateway")
         self.buffer = ""
         self.pending = {}  # id → Future
 
     async def connect(self):
-        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+        self.reader, self.writer = await asyncio.open_connection(self.host, self.gatewayPort)
         asyncio.create_task(self.listen())
 
     async def listen(self):
