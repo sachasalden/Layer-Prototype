@@ -1,6 +1,7 @@
 import asyncio
-from protocol.shared.protocol import send_message, parse_messages
-from protocol.gateway.service_registry import SERVICES
+from protocol import send_message, parse_messages
+from service_registry import SERVICES
+import os
 
 class Gateway:
     def __init__(self, host="127.0.0.1", port=4000):
@@ -51,5 +52,7 @@ class Gateway:
         service_writer.close()
 
 if __name__ == "__main__":
-    gw = Gateway(host="127.0.0.1", port=4000)
+    gw = Gateway(host=os.getenv("HOST", "0.0.0.0"),
+                 port=int(os.getenv("PORT", "4000")))
+
     asyncio.run(gw.start())

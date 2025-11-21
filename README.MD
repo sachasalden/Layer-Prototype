@@ -1,20 +1,16 @@
-commandos
+# Protocol
+
+Voor dit prototype heb je de volgende programmeertalen nodig:
+ - Python 3.11
+ - .NET 9.0
+ - ruby 3.3.10
+
+## Hoe start je alles op
+
+Ga naar de docker-compose.yml in de protocol folder en run die.
 
 ```bash
- python -m protocol.userservice.user_service_server
-```
-```bash
- python -m protocol.gateway.gateway     
-```
-```bash
- python -m protocol.client.client
-```
-```bash
-cd protocol/CardCollection/CardCollection/CardCollection
-dotnet run
-```
 
-```bash
-cd protocol/battleengine
-ruby server.rb
+docker compose up --build
+
 ```

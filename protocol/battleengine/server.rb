@@ -89,6 +89,8 @@ class Server
 end
 
 if __FILE__ == $0
-  server = Server.new(host: "127.0.0.1", port: 6003)
+  host = ENV.fetch("HOST", "0.0.0.0")
+  port = Integer(ENV.fetch("PORT", "6003"))
+  server = Server.new(host: host, port: port)
   server.start
 end

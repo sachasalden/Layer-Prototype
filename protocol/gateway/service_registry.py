@@ -1,5 +1,7 @@
+import os
+
 SERVICES = {
-    "/user": ("127.0.0.1", 6001),
-    "/card": ("127.0.0.1", 4001),
-    "/battle":("127.0.0.1",6003)
+    "/user":   (os.getenv("USER_HOST", "userservice"), int(os.getenv("USER_PORT", "6001"))),
+    "/card":   (os.getenv("CARD_HOST", "cardcollection"), int(os.getenv("CARD_PORT", "4001"))),
+    "/battle": (os.getenv("BATTLE_HOST", "battleengine"), int(os.getenv("BATTLE_PORT", "6003")))
 }
