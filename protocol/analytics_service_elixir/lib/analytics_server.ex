@@ -21,7 +21,7 @@ defmodule AnalyticsServer do
   # Publieke start-functie om de server handmatig te draaien.
   # Voor nu geen OTP-supervisor, maar een simpel luisterende socket.
   @spec start(charlist() | :inet.ip_address(), non_neg_integer()) :: :ok | {:error, term()}
-  def start(host \\ {127, 0, 0, 1}, port \\ 7001) do
+  def start(host \\ {0, 0, 0, 0}, port \\ 7001) do
     # NOTE:
     # - host-parameter wordt nu alleen gebruikt voor logging, niet voor listen.
     #   :gen_tcp.listen bindt op alle interfaces, tenzij anders geconfigureerd.
@@ -160,4 +160,10 @@ defmodule AnalyticsServer do
         nil
     end
   end
+end
+
+# Start automatisch wanneer Mix.env() == :dev
+if Mix.env() == :dev do
+  # Bind op 0.0.0.0 zodat Docker het kan bereiken
+  spawn(fn -> AnalyticsServer.start({0, 0, 0, 0}, 7001) end)
 end
