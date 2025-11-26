@@ -5,7 +5,7 @@ defmodule AnalyticsServiceElixir.MixProject do
     [
       app: :analytics_service_elixir,
       version: "0.1.0",
-      elixir: "~> 1.18",
+      elixir: "~> 1.16.2",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
