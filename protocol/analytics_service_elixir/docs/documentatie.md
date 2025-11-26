@@ -152,7 +152,7 @@ Je ziet:
 ```
 [AnalyticsServer] Listening on 127.0.0.1:7001
 ```
-Als het gelukt is. Laat dit venster openstaan.
+Als het gelukt is, laat dit venster openstaan.
 
 ## 7. Testen van de service
 
@@ -178,11 +178,51 @@ Voer in de projectmap uit:
 mix test test/analytics_server_test.exs
 ```
 
-## 8. Tekortkoming voor een volledige service
+## 8. Docker Development Container
+
+De Analytics-server wordt ook aangeboden als development Docker container.
+
+### 8.1. Dockerfile
+
+Het project bevat een development Dockerfile die:
+1. Elixir runtime installeert
+2. Mix dependencies ophaalt
+3. De code kopieert
+4. Port 7001 expose't
+5. Automatisch de server start via `mix run --no-halt`
+
+## 8.2. Automatisch starten binnen Docker
+
+Onder in `analytics_server.ex` staat:
+```
+if Mix.env() == :dev do
+  spawn(fn -> AnalyticsServer.start({0,0,0,0}, 7001) end)
+end
+```
+Dit zorgt ervoor dat de server automatisch start zodra Docker `mix run --no-halt` uitvoert.
+
+### 8.3. Docker build & run
+
+Build:
+```
+docker build -t analytics-dev .
+```
+
+Run: 
+```
+docker run --rm -p 7001:7001 analytics-dev
+```
+
+Je ziet nu:
+```
+[AnalyticsServer] Listening on 0.0.0.0:7001
+```
+
+## 9. Tekortkoming voor een volledige service
 
 Ondanks dat de server _werkt_, ontbreken formeel nog:
 
-### 8.1. Domeinspecificaties
+### 9.1. Domeinspecificaties
 
 - Hoe leaderboard berekend moet worden (rank, mmr-formule, sortering)
 - Hoe top20 precies moet worden bepaald
@@ -190,18 +230,18 @@ Ondanks dat de server _werkt_, ontbreken formeel nog:
 - Prioriteit van berekeningen
 - Performance-eisen bij grote datasets
 
-### 8.2. Error handling
+### 9.2. Error handling
 
 - 400 → missing field
 - 404 → player not found
 - 500 → internal analytics error
 - etc.
 
-### 8.3. Opslag van analyticsdata
+### 9.3. Opslag van analyticsdata
 
 Op dit moment is alle data dummy.
 
-## 9. Samenvatting
+## 10. Samenvatting
 
 De Analytics-service bestaat uit:
 1. JsonLineProtocol
