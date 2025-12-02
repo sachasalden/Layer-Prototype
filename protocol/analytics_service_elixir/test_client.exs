@@ -3,7 +3,7 @@
 msg = %{
   "id" => "1",
   "action" => "leaderboard",
-  "resource" => "/leaderboard",
+  "resource" => "/analytics",
   "payload" => %{}
 }
 

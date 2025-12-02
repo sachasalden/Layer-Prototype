@@ -31,7 +31,7 @@ defmodule AnalyticsServerTest do
     msg = %{
       "id" => "test-1",
       "action" => "leaderboard",
-      "resource" => "/leaderboard",
+      "resource" => "/analytics",
       "payload" => %{}
     }
 
@@ -51,7 +51,7 @@ defmodule AnalyticsServerTest do
 
     assert response["id"] == "test-1"
     assert response["status"] == 200
-    assert response["resource"] == "/leaderboard"
+    assert response["resource"] == "/analytics"
 
     # payload-structure check
     assert is_map(response["payload"])
